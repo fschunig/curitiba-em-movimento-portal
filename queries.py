@@ -6,7 +6,7 @@ MAIN_QUERY = text(
     SELECT
         cat.name                       AS categoria,
         act.name                       AS curso,
-        c.class_name                   AS turma_genero,
+        c.class_name                   AS turma,
         f.name                         AS local,
         f.address                      AS endereco,
         f.neighborhood                 AS bairro,
@@ -19,6 +19,11 @@ MAIN_QUERY = text(
         c.is_active                    AS turma_ativa,
         snap.available_slots           AS vagas_disponiveis,
         snap.pcd_available_slots       AS vagas_pcd,
+        CASE
+            WHEN snap.availability_status ILIKE 'Disponível' THEN 'Sim'
+            WHEN snap.availability_status IS NULL THEN NULL
+            ELSE 'Não'
+        END                             AS matriculas_abertas,
         snap.collected_at              AS data_coleta
     FROM classes c
     JOIN activities act               ON act.id = c.activity_id
@@ -27,7 +32,7 @@ MAIN_QUERY = text(
     LEFT JOIN activity_categories ac  ON ac.activity_id = act.id
     LEFT JOIN categories cat          ON cat.id = ac.category_id
     LEFT JOIN LATERAL (
-        SELECT s.available_slots, s.pcd_available_slots, s.collected_at
+        SELECT s.available_slots, s.pcd_available_slots, s.availability_status, s.collected_at
         FROM availability_snapshots s
         WHERE s.class_hash = c.class_hash
         ORDER BY s.collected_at DESC

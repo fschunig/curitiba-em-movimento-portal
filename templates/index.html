@@ -4,43 +4,250 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Curitiba em Movimento — Aulas Gratuitas</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <header>
-        <h1>Curitiba em Movimento</h1>
-        <p>Aulas gratuitas da prefeitura — encontre uma vaga perto de você</p>
+    <header class="topbar">
+        <div class="topbar-title">
+            <span class="topbar-eyebrow">Prefeitura de Curitiba</span>
+            <h1>Curitiba em Movimento</h1>
+        </div>
+        <div class="topbar-count">
+            <span class="topbar-count-value">{{ classes|length }}</span>
+            <span class="topbar-count-label">de {{ total_classes }} turmas com estes filtros</span>
+        </div>
     </header>
 
-    <main>
-        {% if error %}
+    <div class="layout">
+        <aside class="sidebar">
+            <form method="get" action="{{ url_for('index') }}">
+                <input type="hidden" name="f" value="1">
+
+                <div class="filter-group">
+                    <label for="busca">Buscar curso ou local</label>
+                    <input type="search" id="busca" name="busca" placeholder="ex: natação, CEL Boqueirão" value="{{ params.get('busca', '') }}">
+                </div>
+
+                <fieldset class="filter-group">
+                    <legend>Categoria</legend>
+                    {% for cat in options.categorias %}
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="categoria" value="{{ cat }}" {{ 'checked' if cat in params.getlist('categoria') }}>
+                        {{ cat }}
+                    </label>
+                    {% endfor %}
+                </fieldset>
+
+                <div class="filter-group">
+                    <label for="regiao">Região</label>
+                    <select id="regiao" name="regiao">
+                        <option value="">Todas as regiões</option>
+                        {% for reg in options.regioes %}
+                        <option value="{{ reg }}" {{ 'selected' if params.get('regiao') == reg }}>{{ reg }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="bairro">Bairro</label>
+                    <select id="bairro" name="bairro">
+                        <option value="">Todos os bairros</option>
+                        {% for b in options.bairros %}
+                        <option value="{{ b }}" {{ 'selected' if params.get('bairro') == b }}>{{ b }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <fieldset class="filter-group">
+                    <legend>Dia da semana</legend>
+                    {% for code in weekday_order %}
+                    <label class="checkbox-row checkbox-row--inline">
+                        <input type="checkbox" name="dia" value="{{ code }}" {{ 'checked' if code in params.getlist('dia') }}>
+                        {{ weekday_labels[code] }}
+                    </label>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset class="filter-group">
+                    <legend>Período do dia</legend>
+                    <label class="radio-row">
+                        <input type="radio" name="periodo" value="" {{ 'checked' if not params.get('periodo') }}>
+                        Qualquer horário
+                    </label>
+                    {% for key, info in time_periods.items() %}
+                    <label class="radio-row">
+                        <input type="radio" name="periodo" value="{{ key }}" {{ 'checked' if params.get('periodo') == key }}>
+                        {{ info[0] }}
+                    </label>
+                    {% endfor %}
+                </fieldset>
+
+                <fieldset class="filter-group">
+                    <legend>Idade de quem vai participar</legend>
+                    <label class="checkbox-row">
+                        <input type="checkbox" id="idade_qualquer" name="idade_qualquer" {{ 'checked' if (not filters_submitted) or ('idade_qualquer' in params) }}>
+                        Qualquer faixa etária
+                    </label>
+                    <div class="age-slider-row">
+                        <input
+                            type="range"
+                            id="idade"
+                            name="idade"
+                            min="{{ idade_min }}"
+                            max="{{ idade_max }}"
+                            value="{{ params.get('idade', 30) }}"
+                            {{ 'disabled' if (not filters_submitted) or ('idade_qualquer' in params) }}
+                        >
+                        <output for="idade" id="idade-output">{{ params.get('idade', 30) }} anos</output>
+                    </div>
+                </fieldset>
+
+                <fieldset class="filter-group">
+                    <legend>Disponibilidade</legend>
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="somente_com_vaga" {{ 'checked' if (not filters_submitted) or ('somente_com_vaga' in params) }}>
+                        Somente com vaga
+                    </label>
+                    <label class="checkbox-row">
+                        <input type="checkbox" name="vaga_pcd" {{ 'checked' if 'vaga_pcd' in params }}>
+                        Com vaga PCD
+                    </label>
+                </fieldset>
+
+                <button type="submit" class="apply-button">Aplicar filtros</button>
+                <a href="{{ url_for('index') }}" class="clear-link">Limpar filtros</a>
+            </form>
+        </aside>
+
+        <main class="board">
+            {% if error %}
             <p class="alert-error">{{ error }}</p>
-        {% endif %}
+            {% endif %}
 
-        {# TODO: barra de filtros (categoria, curso, região, dia da semana,
-           horário, faixa etária, só com vaga, vaga PCD) entra aqui #}
-
-        <p class="result-count">{{ classes|length }} turma(s) encontrada(s)</p>
-
-        <div class="class-grid">
-            {% for turma in classes %}
-            <article class="class-card {{ 'has-vacancy' if (turma.vagas_disponiveis or 0) > 0 else 'no-vacancy' }}">
-                <h2>{{ turma.curso }}</h2>
-                <p class="category">{{ turma.categoria or 'Sem categoria' }}</p>
-                <p class="location">{{ turma.local }} — {{ turma.bairro or turma.regiao }}</p>
-                <p class="schedule">{{ turma.dias_semana }} · {{ turma.horario_inicio }}–{{ turma.horario_fim }}</p>
-                <p class="vacancy">
-                    {% if (turma.vagas_disponiveis or 0) > 0 %}
-                        ✅ {{ turma.vagas_disponiveis }} vaga(s)
-                    {% else %}
-                        ❌ Sem vaga
-                    {% endif %}
-                </p>
-            </article>
+            {% if classes %}
+                {% for categoria, turmas in classes|groupby('categoria') %}
+                <section class="board-section">
+                    <h2>{{ categoria or 'Sem categoria' }}</h2>
+                    <div class="board-rows">
+                        {% for turma in turmas %}
+                        <article class="board-row {{ 'is-available' if (turma.vagas_disponiveis or 0) > 0 else 'is-full' }}">
+                            <div class="board-row-time">
+                                <span class="time-range">{{ turma.horario_inicio.strftime('%H:%M') if turma.horario_inicio else '—' }}–{{ turma.horario_fim.strftime('%H:%M') if turma.horario_fim else '—' }}</span>
+                                <span class="weekdays">{{ turma.dias_semana }}</span>
+                            </div>
+                            <div class="board-row-main">
+                                <span class="course-name">{{ turma.curso }}</span>
+                                <span class="location">{{ turma.local }}{% if turma.bairro %} · {{ turma.bairro }}{% endif %}</span>
+                                {% if turma.matriculas_abertas == 'Sim' %}
+                                <span class="enrollment-tag enrollment-tag--open">Matrículas abertas</span>
+                                {% elif turma.matriculas_abertas == 'Não' %}
+                                <span class="enrollment-tag">Matrículas encerradas</span>
+                                {% endif %}
+                            </div>
+                            <div class="board-row-age">
+                                {% if turma.idade_min or turma.idade_max %}
+                                    {{ turma.idade_min or 0 }}–{{ turma.idade_max or '+' }} anos
+                                {% else %}
+                                    Todas as idades
+                                {% endif %}
+                            </div>
+                            <div class="board-row-status">
+                                {% if (turma.vagas_disponiveis or 0) > 0 %}
+                                    <span class="vacancy-count">{{ turma.vagas_disponiveis }}</span>
+                                    <span class="vacancy-label">vagas</span>
+                                {% else %}
+                                    <span class="vacancy-label vacancy-label--full">Sem vaga</span>
+                                {% endif %}
+                                {% if (turma.vagas_pcd or 0) > 0 %}
+                                <span class="pcd-badge">PCD</span>
+                                {% endif %}
+                            </div>
+                        </article>
+                        {% endfor %}
+                    </div>
+                </section>
+                {% endfor %}
             {% else %}
-            <p>Nenhuma turma encontrada.</p>
-            {% endfor %}
-        </div>
-    </main>
+            <p class="empty-state">Nenhuma turma encontrada com esses filtros. Tente remover algum filtro.</p>
+            {% endif %}
+        </main>
+    </div>
+
+    <script>
+        var regionBairroPairs = {{ region_bairro_pairs | tojson }};
+        var regiaoSelect = document.getElementById('regiao');
+        var bairroSelect = document.getElementById('bairro');
+
+        function unique(values) {
+            return Array.from(new Set(values)).sort();
+        }
+
+        var allRegioes = unique(regionBairroPairs.map(function (p) { return p[0]; }));
+        var allBairros = unique(regionBairroPairs.map(function (p) { return p[1]; }));
+
+        function escapeHtml(str) {
+            return str
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;');
+        }
+
+        function optionsFor(index, filterValue, filterIndex) {
+            var values = regionBairroPairs
+                .filter(function (p) { return !filterValue || p[filterIndex] === filterValue; })
+                .map(function (p) { return p[index]; });
+            return unique(values);
+        }
+
+        function rebuildSelect(select, values, allLabel, currentValue) {
+            var html = '<option value="">' + allLabel + '</option>';
+            values.forEach(function (value) {
+                var selected = value === currentValue ? ' selected' : '';
+                var safe = escapeHtml(value);
+                html += '<option value="' + safe + '"' + selected + '>' + safe + '</option>';
+            });
+            select.innerHTML = html;
+        }
+
+        function syncBairroFromRegiao() {
+            var regiao = regiaoSelect.value;
+            var current = bairroSelect.value;
+            var values = regiao ? optionsFor(1, regiao, 0) : allBairros;
+            var keep = values.indexOf(current) !== -1 ? current : '';
+            rebuildSelect(bairroSelect, values, 'Todos os bairros', keep);
+        }
+
+        function syncRegiaoFromBairro() {
+            var bairro = bairroSelect.value;
+            var current = regiaoSelect.value;
+            var values = bairro ? optionsFor(0, bairro, 1) : allRegioes;
+            var keep = values.indexOf(current) !== -1 ? current : '';
+            rebuildSelect(regiaoSelect, values, 'Todas as regiões', keep);
+        }
+
+        regiaoSelect.addEventListener('change', syncBairroFromRegiao);
+        bairroSelect.addEventListener('change', syncRegiaoFromBairro);
+
+        syncBairroFromRegiao();
+        syncRegiaoFromBairro();
+
+        var qualquer = document.getElementById('idade_qualquer');
+        var slider = document.getElementById('idade');
+        var output = document.getElementById('idade-output');
+
+        function syncIdade() {
+            slider.disabled = qualquer.checked;
+        }
+
+        qualquer.addEventListener('change', syncIdade);
+        slider.addEventListener('input', function () {
+            output.textContent = slider.value + ' anos';
+        });
+        syncIdade();
+    </script>
 </body>
 </html>
