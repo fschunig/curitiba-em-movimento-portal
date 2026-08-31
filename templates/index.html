@@ -156,13 +156,18 @@
                             </div>
                             <div class="board-row-status">
                                 {% if (turma.vagas_disponiveis or 0) > 0 %}
-                                    <span class="vacancy-count">{{ turma.vagas_disponiveis }}</span>
-                                    <span class="vacancy-label">vagas</span>
+                                    <div class="vacancy-block">
+                                        <span class="vacancy-count">{{ turma.vagas_disponiveis }}</span>
+                                        <span class="vacancy-label">vagas</span>
+                                    </div>
                                 {% else %}
                                     <span class="vacancy-label vacancy-label--full">Sem vaga</span>
                                 {% endif %}
                                 {% if (turma.vagas_pcd or 0) > 0 %}
-                                <span class="pcd-badge">PCD</span>
+                                    <div class="pcd-block">
+                                        <span class="pcd-count">{{ turma.vagas_pcd }}</span>
+                                        <span class="pcd-label">PCD</span>
+                                    </div>
                                 {% endif %}
                             </div>
                         </article>

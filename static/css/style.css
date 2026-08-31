@@ -277,7 +277,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    gap: 0.5rem;
+    gap: 1rem;
+}
+
+.vacancy-block,
+.pcd-block {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    line-height: 1.1;
 }
 
 .vacancy-count {
@@ -297,13 +305,17 @@ body {
     font-weight: 600;
 }
 
-.pcd-badge {
-    background: var(--color-accent-pcd);
-    color: white;
-    font-size: 0.65rem;
+.pcd-count {
+    font-family: var(--font-mono);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--color-accent-pcd);
+}
+
+.pcd-label {
+    font-size: 0.75rem;
+    color: var(--color-accent-pcd);
     font-weight: 600;
-    padding: 0.15rem 0.4rem;
-    border-radius: 3px;
 }
 
 .empty-state {
@@ -344,6 +356,11 @@ body {
 
     .board-row-status {
         justify-content: flex-start;
+    }
+
+    .vacancy-block,
+    .pcd-block {
+        align-items: flex-start;
     }
 }
 
