@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curitiba em Movimento — Aulas Gratuitas</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+    <header>
+        <h1>Curitiba em Movimento</h1>
+        <p>Aulas gratuitas da prefeitura — encontre uma vaga perto de você</p>
+    </header>
+
+    <main>
+        {% if error %}
+            <p class="alert-error">{{ error }}</p>
+        {% endif %}
+
+        {# TODO: barra de filtros (categoria, curso, região, dia da semana,
+           horário, faixa etária, só com vaga, vaga PCD) entra aqui #}
+
+        <p class="result-count">{{ classes|length }} turma(s) encontrada(s)</p>
+
+        <div class="class-grid">
+            {% for turma in classes %}
+            <article class="class-card {{ 'has-vacancy' if (turma.vagas_disponiveis or 0) > 0 else 'no-vacancy' }}">
+                <h2>{{ turma.curso }}</h2>
+                <p class="category">{{ turma.categoria or 'Sem categoria' }}</p>
+                <p class="location">{{ turma.local }} — {{ turma.bairro or turma.regiao }}</p>
+                <p class="schedule">{{ turma.dias_semana }} · {{ turma.horario_inicio }}–{{ turma.horario_fim }}</p>
+                <p class="vacancy">
+                    {% if (turma.vagas_disponiveis or 0) > 0 %}
+                        ✅ {{ turma.vagas_disponiveis }} vaga(s)
+                    {% else %}
+                        ❌ Sem vaga
+                    {% endif %}
+                </p>
+            </article>
+            {% else %}
+            <p>Nenhuma turma encontrada.</p>
+            {% endfor %}
+        </div>
+    </main>
+</body>
+</html>

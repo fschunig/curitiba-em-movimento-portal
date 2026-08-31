@@ -1,0 +1,56 @@
+:root {
+    --color-bg: #f7f7f5;
+    --color-text: #1a1a1a;
+    --color-primary: #0b6e4f;
+    --color-vacancy: #1a7f37;
+    --color-no-vacancy: #b42318;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: system-ui, -apple-system, sans-serif;
+    background: var(--color-bg);
+    color: var(--color-text);
+}
+
+header {
+    padding: 1.5rem 1rem;
+    background: var(--color-primary);
+    color: white;
+}
+
+header h1 { margin: 0 0 0.25rem 0; font-size: 1.5rem; }
+header p { margin: 0; opacity: 0.9; }
+
+main { padding: 1rem; }
+
+.result-count { color: #555; font-size: 0.9rem; }
+
+.class-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.class-card {
+    background: white;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    border-left: 4px solid var(--color-no-vacancy);
+}
+
+.class-card.has-vacancy { border-left-color: var(--color-vacancy); }
+
+.class-card h2 { font-size: 1.1rem; margin: 0 0 0.25rem 0; }
+.class-card .category { font-size: 0.8rem; text-transform: uppercase; color: #888; margin: 0 0 0.5rem 0; }
+.class-card p { margin: 0.25rem 0; font-size: 0.9rem; }
+
+.alert-error {
+    background: #fdecea;
+    color: var(--color-no-vacancy);
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+}
