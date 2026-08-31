@@ -19,9 +19,6 @@ def create_app():
             classes = get_active_classes()
             error = None
         except SQLAlchemyError:
-            # Ex.: partição do mês corrente ainda não criada pelo Airflow,
-            # ou banco temporariamente indisponível. Falha de forma amigável
-            # em vez de estourar erro 500 cru pro usuário.
             classes = []
             error = (
                 "Não foi possível carregar as aulas no momento. "

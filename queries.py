@@ -1,11 +1,3 @@
-"""Queries de leitura usadas pela landing page.
-
-A query principal replica exatamente o padrão de referência das instruções
-do projeto: LEFT JOIN LATERAL para pegar o snapshot de disponibilidade mais
-recente por turma. Qualquer query nova que envolva vagas deve manter esse
-mesmo padrão.
-"""
-
 from sqlalchemy import text
 from extensions import db, cache
 
@@ -49,11 +41,5 @@ MAIN_QUERY = text(
 
 @cache.cached(key_prefix="active_classes")
 def get_active_classes():
-    """Retorna todas as turmas ativas com o snapshot de vaga mais recente.
-
-    Resultado é cacheado (ver Config.CACHE_DEFAULT_TIMEOUT) porque os dados
-    só mudam quando o Airflow roda — não faz sentido bater no Postgres a
-    cada request.
-    """
     result = db.session.execute(MAIN_QUERY)
     return [dict(row._mapping) for row in result]

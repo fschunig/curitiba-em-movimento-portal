@@ -1,15 +1,3 @@
-"""Modelos SQLAlchemy — refletem o schema.sql do projeto de ingestão (Airflow).
-
-Este app é somente leitura: nenhuma dessas classes deve ser usada para
-INSERT/UPDATE/DELETE a partir daqui.
-
-⚠️ ATENÇÃO: `Category` e `ActivityCategory` ainda não foram confirmadas
-contra o schema.sql real (não vieram no arquivo enviado). A estrutura
-abaixo é a suposição descrita nas instruções do projeto:
-categories(id, name) e activity_categories(activity_id, category_id).
-Ajustar assim que o schema for confirmado.
-"""
-
 from extensions import db
 
 
@@ -58,7 +46,7 @@ class ClassGroup(db.Model):
     class_name = db.Column(db.String)
     start_time = db.Column(db.Time)
     end_time = db.Column(db.Time)
-    weekdays = db.Column(db.String)  # texto livre em pt-BR, ex: "2ª e 6ª"
+    weekdays = db.Column(db.String)  
     min_age = db.Column(db.Integer)
     max_age = db.Column(db.Integer)
     first_seen_at = db.Column(db.DateTime)
@@ -80,8 +68,6 @@ class AvailabilitySnapshot(db.Model):
     pcd_available_slots = db.Column(db.Integer)
     possibly_incomplete = db.Column(db.Boolean)
 
-
-# --- Tabelas ainda não confirmadas contra o schema.sql real ---
 
 class Category(db.Model):
     __tablename__ = "categories"
