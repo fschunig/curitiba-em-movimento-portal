@@ -29,6 +29,9 @@ def create_app():
             classes = get_active_classes()
             error = None
         except SQLAlchemyError:
+            # Ex.: partição do mês corrente ainda não criada pelo Airflow,
+            # ou banco temporariamente indisponível. Falha de forma amigável
+            # em vez de estourar erro 500 cru pro usuário.
             classes = []
             error = (
                 "Não foi possível carregar as aulas no momento. "
@@ -42,10 +45,15 @@ def create_app():
         else:
             turmas = [t for t in classes if (t["vagas_disponiveis"] or 0) > 0]
 
+        total_vagas = sum((t["vagas_disponiveis"] or 0) for t in turmas)
+        total_vagas_pcd = sum((t["vagas_pcd"] or 0) for t in turmas)
+
         return render_template(
             "index.html",
             classes=turmas,
             total_classes=len(classes),
+            total_vagas=total_vagas,
+            total_vagas_pcd=total_vagas_pcd,
             error=error,
             options=filter_options(classes),
             region_bairro_pairs=region_bairro_pairs(classes),

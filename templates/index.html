@@ -15,11 +15,26 @@
             <span class="topbar-eyebrow">Prefeitura de Curitiba</span>
             <h1>Curitiba em Movimento</h1>
         </div>
-        <div class="topbar-count">
-            <span class="topbar-count-value">{{ classes|length }}</span>
-            <span class="topbar-count-label">de {{ total_classes }} turmas com estes filtros</span>
-        </div>
     </header>
+
+    <div class="stats-bar">
+        <div class="stat">
+            <span class="stat-value">{{ total_classes }}</span>
+            <span class="stat-label">Total de turmas</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value">{{ classes|length }}</span>
+            <span class="stat-label">Turmas com este filtro</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value">{{ total_vagas }}</span>
+            <span class="stat-label">Vagas com este filtro</span>
+        </div>
+        <div class="stat">
+            <span class="stat-value stat-value--pcd">{{ total_vagas_pcd }}</span>
+            <span class="stat-label">Vagas PCD com este filtro</span>
+        </div>
+    </div>
 
     <div class="layout">
         <aside class="sidebar">
